@@ -25,6 +25,7 @@ NeetBear.hello();
 ## typescript 
 javascript로 컴파일해서 실행 -> 브라우저가 javascript를 이해하므로 / 단 node.js는 typescript 읽는다
 typescript로 작성한 코드에 오류가 있으면 javascript로 컴파일 불가능 -> 이 방식으로 javascript에서 못잡는 type 에러 해결
+
 ### type system
 컴파일러(컴파일러의 type checker)에게 변수의 타입을 알려줘야한다. 단, 타입스크립트는 변수 선언만 해도 타입을 추론해서 처리 해준다.
 ```typescript
@@ -179,5 +180,145 @@ function hi(name:string|number) {
         name // 이때 name은 never type
         // 이 코드는 함수가 정상적으로 실행될때 작동하면 안되는 부분이다
     }
+}
+```
+
+## typescript에서의 function
+### call signatures
+```typescript
+const add = (a: number, b: number) => a + b; 
+// 이때 add에 대한 call signatures는 (a: number, b: number) => number
+// 함수의 매개변수 타입과 반환 타입을 알려준다
+
+type Add = (a: number, b: number) => number;
+/*
+type Add = {
+    (a: number, b: number) : number
+} 이렇게도 작성 가능하다(overloading)
+*/
+const add2: Add = (a, b) => a + b;
+``` 
+
+### overloading
+함수가 서로 다른 여러 signature를 가질 경우 발생 
+```typescript
+type Add = {
+    (a: number, b: number) : number
+    (a: number, b: string) : number
+} // 이 경우 b: number|string 
+const add: Add = (a, b) => {
+    if(typeof b === "string") return a;
+    return a + b;
+}
+``` 
+
+- react.js(Next.js)에서 볼 만한 예시
+```
+Router.push("/home")
+Router.push({
+    path: "/home",
+    state: 1
+})
+```
+```typescript
+// push는 이런 식으로 구성되어 있을 것이다
+type Config = {
+    path: string,
+    state: object
+}
+type Push = {
+    (path: string): void,
+    (config: Config): void
+}
+const push: Push = (config) => {
+    if(typeof config === "string") {
+        // config로 페이지 이동
+    } else {
+        // config.path로 페이지 이동
+    }
+}
+```
+오버로딩 응용
+```typescript
+type Add = {
+    (a: number, b: number) : number
+    (a: number, b: number, c:number) : number
+} 
+const add: Add = (a, b, c?:number) => { // c는 option
+    if(c) return a + b + c;
+    return a + b;
+}
+``` 
+
+### polymorphism
+poly : multi, many, several, much
+morpho : form, structure
+즉, 여러 다른 구조들이란 뜻이 된다 
+```typescript
+type SuperPrint = {
+    (arr: number[]): void
+    (arr: boolean[]): void
+    (arr: string[]): void
+} // -> 모든 경우의 signature를 줘야 하므로 비효율적이다
+const superPrint: SuperPrint = (arr) => {
+    arr.forEach(i => console.log(i))
+}
+
+// concrete type : number, boolean, string, void, unknown 등등
+// generic type : type의 placeholder 느낌
+// 모든 signature 만들순 없으니 generic 활용할 것
+
+type SuperPrint2 = {
+    // <generic type 이름>
+    <TypePlaceholder>(arr: TypePlaceholer[]): void // TypePlaceholder -> return 존재할 경우 
+    // 이름이라 짧게 T나 V로 쓰기도 한다
+    // <T>(arr: T[]): T
+}
+const superPrint2: SuperPrint2 = (arr) => {
+    arr.forEach(i => console.log(i))
+}
+// generic type 사용시 매개변수의 타입을 보고 타입을 유추해서 signature 생성
+``` 
+
+### generics recap
+```typescript
+type SuperPrint = {
+    <T, M>(a: T[], b: M): T
+}
+const superPrint: SuperPrint = (a) => a[0]
+// any 안쓰고 generic을 사용하는 이유는 any는 type system을 무시하므로 런타임 에러 가능 
+``` 
+
+### 활용
+```typescript
+function superPrint<V>(a: v[]) {
+    return a[0]
+}
+const a = suprePrint<number>([1,2,3,4]); // <number>라고 overwrite 도 가능
+
+type Player<E> = {
+    name: string
+    extraInfo: E
+}
+type NeetExtra = {
+    {favFood: string}
+}
+type NeetPlayer = Player<NeetExtra>
+const neet: NeetPlayer = {
+    name: "neet",
+    extraInfo: {
+        favFood: "kimchi"
+    }
+}
+
+const bear: Player<null> = {
+    name: "bear",
+    extraInfo: null
+}
+
+type A = Array<number>
+let a: A = [1,2,3,4];
+
+function printAllNumbers(arr: Array<number>) { // arr: number[] 같은 기능    
 }
 ```
