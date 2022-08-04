@@ -322,3 +322,246 @@ let a: A = [1,2,3,4];
 function printAllNumbers(arr: Array<number>) { // arr: number[] 같은 기능    
 }
 ```
+
+## class
+### constructor
+private, public 기능은 javascript로 compile 시 없어진다
+```typescript
+class Player {
+    constructor(
+        private firstname: string,  // this.firstname
+        private lastname: string,   // this.lastname
+        public nickname: string     // this.nickname
+    ) {}
+}
+
+const neet = new Player("Neet", "Bear", "gugom");
+console.log(neet.firstname); // private이라 컴파일 에러
+```
+
+### abstract class (추상 클래스)
+직접 인스턴스 생성을 못하고 다른 클래스가 상속받아 사용할 수 있는 클래스
+javascript에는 없는 개념이라 컴파일시 일반 클래스로 표현된다
+단, 상속을 받아도 private에는 접근 불가능하다 
+```typescript
+abstract class User{
+    constructor(
+        private firstname: string,  // this.firstname
+        private lastname: string,   // this.lastname
+        public nickname: string     // this.nickname
+    ) {}
+}
+
+class Player extends User{
+    
+}
+
+const neet = new Player("Neet", "Bear", "gugom");
+```
+
+### methods & abstract methods
+methods도 public private 가능
+```typescript
+abstract class User{
+    constructor(
+        // 자식 클래스에서 접근 허용하려면 private 대신 protected 사용
+        protected firstname: string,  
+        protected lastname: string,   
+        protected nickname: string     
+    ) {}
+    abstract getNickName(): void 
+    private getFullName() {
+        return `${this.firstname} ${this.lastname}`
+    }
+}
+
+class Player extends User{
+    getNickName() {
+        console.log(this.nickname);
+    }
+}
+
+const neet = new Player("Neet", "Bear", "gugom");
+neet.getNickName() // private methods라 오류
+```
+
+### 활용
+```typescript
+type Words = {
+    [key: string]: string // key-value 쌍의 object
+}
+class Dict {
+    private words: Words // constructor에서 초기화 안해주면 에러 발생
+    constructor(
+        this.words = {}
+    ) {}
+    add(word: Word) { // class도 type처럼 사용 가능하다
+        if(this.words[word.term] === undefined) {
+            this.words[word.term] = word.def
+        }
+    }
+    def(term: string) {
+        return this.words[term]
+    }
+    static hello() {
+        return "hello";
+    }
+}
+class Word {
+    constructor(
+        // public이어도 readonly 속성으로 값 변경 불가능
+        public readonly term: string,
+        public readonly def: string
+    ) {}
+}
+
+const kimchi = new Word("kimchi", "Korean food");
+const dict = new Dict();
+dict.add(kimchi);
+dict.def("kimchi");
+
+Dict.hello();
+```
+
+### interfaces
+interface는 컴파일시 사라진다
+```typescript
+// type alias 방식 1
+type Nickname = string;
+type HealthBar = number;
+type Freinds = Array<string>;
+
+type Player = {
+    nickname: Nickname,
+    healthBar: HealthBar
+}
+const neet = {
+    nickname: "neetBear",
+    healthBar: 10
+}
+
+// 방식 2
+type Team = "red" | "blue" | "yellow"
+type Health  = 1 | 5 | 10
+
+type Player2 = {
+    nickname: string,
+    team: Team,
+    health: Health
+}
+
+const bear = {
+    nickname: "neetbear",
+    team: "red",
+    health: 10
+}
+
+// 방식 3 - interface
+// type과 interface 차이
+// 인터페이스는 오직 object의 모양을 특정해주는 용도
+interface Player3 { 
+    nickname: string,
+    team: Team,
+    health: Health
+}
+
+const neetbear = {
+    nickname: "neetbear",
+    team: "red",
+    health: 10
+}
+```
+```typescript
+interface User {
+    name: string
+}
+interface Player extends User {
+// type Player = User &  -> 타입으로 작성한 경우
+}
+
+const neet: Player = {
+    name: "neetBear"
+}
+```
+```typescript
+interface User {
+    name: string
+}
+interface User {
+    lastName: string
+}
+interface User {
+    health: number
+}
+// 3번 각각 나눠서 작성하여도 typescript가 알아서 하나로 합쳐준다 -> type과의 차이점
+const neet: User = {
+    name: "neet",
+    lastName: "bear",
+    health: 10
+}
+```
+
+### interfaces2
+```typescript
+abstract class User {
+    constructor (
+        protected firstName: string,
+        protected lastName: string
+    ) {}
+    abstract sayHi(name: string): string
+    abstract fullName(): string
+}
+class Player extends User {
+    fullName() {
+        return `${this.firstName} ${this.lastName}`
+    }
+    sayHi(name: string) {
+        return `Hello ${name}. My name is ${this.fullName}`
+    }
+}
+// 추상 클래스의 문제점은 javascript에 없는 개념이다 
+```
+```typescript
+interface User {
+    firstName: string,
+    lastName: string
+    sayHi(name: string): string
+    fullName(): string
+}
+interface Human {
+    health: number
+}
+class Player implements User, Human {
+    constructor( // interface에서 public이니까 private 불가능
+        public firstName: string,
+        public lastName: string,
+        public health: number
+    ) {}
+    fullName() {
+        return `${this.firstName} ${this.lastName}`
+    }
+    sayHi(name: string) {
+        return `Hello ${name}. My name is ${this.fullName}`
+    }
+}
+// interface를 type으로 사용하는 것은 가능하다
+function makeUser(user: User) {
+    return "hi"
+}
+makeUser({
+    firstName: "neet",
+    lastName: "bear",
+    fullName: () => "xxx",
+    sayHi(name) => "string"
+})
+// interface를 return 받는 경우에는
+function makeUser2(user: User): User {
+    return {
+        firstName: "neet",
+        lastName: "bear",
+        fullName: () => "xxx",
+        sayHi(name) => "string"
+    }
+    // return user
+}
+```
