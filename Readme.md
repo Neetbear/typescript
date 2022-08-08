@@ -565,3 +565,75 @@ function makeUser2(user: User): User {
     // return user
 }
 ```
+
+### recap
+```typescript
+type PlayerA = {
+    name: string
+}
+type PlayerAA = PlayerA & {
+    lastName: string
+}
+const playerAA: PlayerAA = {
+    name: "neet",
+    lastName: "bear"
+}
+
+interface PlayerB {
+    name: string
+}
+interface PlayerBB extends PlayerB {
+    lastName: string
+}
+interface PlayerBB {
+    health: number
+}
+const playerBB: PlayerBB = {
+    name: "neet",
+    lastName: "bear",
+    health: 10
+}
+```
+```typescript
+type PlayerA = {
+    firstName: string
+}
+interface PlayerB {
+    firstName: string
+}
+class User implements PlayerB /* | playerA */ {
+    constructor (
+        public firstName: string
+    ) {}
+}
+```
+
+### Polymorphism
+generic -> concrete type X placeholder type O
+```typescript
+interface SStorage<T> {
+    [key: string]: T 
+}
+class LocalStorage<T> {
+    private storage: SStorage<T> = {}
+    set(key: string, value: T){
+        this.storage[key] = value;
+    }
+    remove(key: string) {
+        delete this.storage[key];
+    }
+    get(key: string): T {
+        return this.storage[key];
+    }
+    clear() {
+        this.storage = {}
+    }
+}
+
+const stringStorage = new LocalStorage<string>()
+stringStorage.set("Hello", "How are you?")
+stringStorage.get("Hello")
+
+const booleanStorage = new LocalStorage<boolean>()
+booleanStorage.set("Man", true)
+```
