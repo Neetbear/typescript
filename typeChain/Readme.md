@@ -30,3 +30,12 @@ compilerOptions == 컴파일러에 주는 옵션
     - allowJs == 타입스크립트 파일에서 자바스크립트를 허용하겠다(.js 파일 import 등등)
         % @ts-check ts파일에서 사용하는 js파일에 작성하면 컴파일러가 js파일도 체킹해줌
         JSDoc 사용해서 타입알려주면 js코드 건드릴 필요 없다
+
+package.json에 "start": "node build/index.js" 추가 (실행 파일)
+
+npm i -D ts-node (빌드없이 타입스크립트 실행 가능 개발환경 용도)
+npm i nodemon
+package.json에 "dev": "nodemon --exec ts-node src/index.ts" 추가
+
+definitely typed == npm에 존재하는 거의 모든 모듈의 type 정의 파일을 가지고 있다
+npm i -D @types/node

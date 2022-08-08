@@ -1,9 +1,2 @@
-// const hello = () => "hi";
-class Block {
-    constructor(data) {
-        this.data = data;
-    }
-    static hello() {
-        return "Hi";
-    }
-}
+"use strict";
+console.log("Hi");

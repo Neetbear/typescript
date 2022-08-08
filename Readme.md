@@ -403,7 +403,7 @@ class Dict {
     def(term: string) {
         return this.words[term]
     }
-    static hello() {
+    static hello() { // 인스턴스 생성없이도 호출 가능한 class의 함수
         return "hello";
     }
 }
